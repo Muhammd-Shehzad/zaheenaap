@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zaheenaap/Custom_Widget/bottom_navagation.dart';
 import 'package:zaheenaap/Ui/Home/home_screen.dart';
 
 class SplashService {
@@ -7,7 +8,7 @@ class SplashService {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => HomeScreen(),
+          builder: (context) => BottomNavagation(),
         ),
       );
     });
