@@ -15,6 +15,5 @@ class _CourseScreenState extends State<CourseScreen> {
         title: Text('Course Screen'),
       ),
     );
-    ;
   }
 }

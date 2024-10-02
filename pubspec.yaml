@@ -37,6 +37,7 @@ dependencies:
   flutter_screenutil: ^5.9.3
   carousel_slider: ^5.0.0
   cached_network_image: ^3.4.1
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +68,8 @@ flutter:
     - "assets/banner/img3.jpg"
     - "assets/skilled/applicationdev.png"
     - "assets/profile.jpg"
+    - "assets/skilled/graphicdesign.png"
+    - "assets/skilled/webdev.png"
 
   #   - images/a_dot_ham.jpeg
 

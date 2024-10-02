@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:zaheenaap/Custom_Widget/list_view_builder.dart';
+import 'package:zaheenaap/Custom_Widget/list_view_text.dart';
+import 'package:zaheenaap/Ui/Home/servise.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,14 +17,48 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int current = 0;
+  final CarouselSliderController _controller = CarouselSliderController();
 
   List<String> sliderImages = [
     'assets/banner/img1.jpg',
     'assets/banner/img2.jpg',
     'assets/banner/img3.jpg'
   ];
+  List<String> skillImages = [
+    'assets/skilled/graphicdesign.png',
+    'assets/skilled/applicationdev.png',
+    'assets/skilled/webdev.png'
+  ];
 
-  final CarouselSliderController _controller = CarouselSliderController();
+  List<String> skillNames = [
+    'Website Development',
+    'Application Development',
+    'Graphic Designing'
+  ];
+
+  List<String> names1 = [];
+  List<String> imageUrls2 = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    final response = await http
+        .get(Uri.parse('https://api.zaheen.com.pk/api/fetchByTableName/2/1'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        names1 = List<String>.from(data.map((item) => item['name']));
+        imageUrls2 =
+            List<String>.from(data.map((item) => item['thumbnailUrl']));
+      });
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('Home Screen'),
       ),
-      backgroundColor: const Color.fromARGB(255, 233, 230, 230),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Expanded(
           child: SingleChildScrollView(
@@ -115,28 +153,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(18.0),
-                  child: CarouselSlider.builder(
-                    carouselController: _controller,
-                    itemCount: sliderImages.length,
-                    itemBuilder: (context, index, realIdx) {
-                      return Container(
-                        height: 200.h,
-                        width: 300.w,
-                        child: ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(20.0), // Rounded corners
-                          child: Image.asset(
-                            sliderImages[index],
-                            fit: BoxFit.fill,
+                  padding: const EdgeInsets.all(8.0),
+                  child: CarouselSlider(
+                    items: sliderImages
+                        .map(
+                          (item) => ClipRRect(
+                            borderRadius: BorderRadius.circular(20.0),
+                            child: Image.asset(
+                              item,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        )
+                        .toList(),
+                    carouselController: _controller,
                     options: CarouselOptions(
+                      scrollPhysics: const BouncingScrollPhysics(),
                       autoPlay: true,
-                      enlargeCenterPage: true,
-                      aspectRatio: 2.0,
+                      aspectRatio: 2,
+                      viewportFraction: 1,
                       onPageChanged: (index, reason) {
                         setState(() {
                           current = index;
@@ -149,99 +185,35 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: sliderImages.asMap().entries.map((entry) {
                     return InkWell(
-                      onTap: () => CarouselSliderController().animateToPage,
+                      onTap: () =>
+                          CarouselSliderController().animateToPage(entry.key),
                       child: Container(
-                        width: 12.0, // Indicator width
-                        height: 12.0, // Indicator height
+                        width: current == entry.key ? 17 : 7,
+                        height: 5.0,
                         margin: EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 4.0),
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: current == entry.key
-                              ? Color.fromRGBO(
-                                  0, 0, 0, 0.9) // Active indicator color
-                              : Color.fromRGBO(
-                                  0, 0, 0, 0.4), // Inactive indicator color
+                          color:
+                              current == entry.key ? Colors.black : Colors.grey,
                         ),
                       ),
                     );
-                  }).toList(), // Ensure to convert the map results to a list
+                  }).toList(),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Boards',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18.sp,
-                        ),
-                      ),
-                      InkWell(
-                        child: Row(
-                          children: [
-                            Text(
-                              'View all',
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 18.sp),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 20,
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 5.h,
-                ),
-                SizedBox(
-                  height: 150.h,
-                  child: ListViewbuilder(image: 'assets/banner/img1.jpg'),
-                ),
+                ListviewText(text: 'Board'),
                 SizedBox(
                   height: 10.h,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Courses',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18.sp,
-                        ),
-                      ),
-                      InkWell(
-                        child: Row(
-                          children: [
-                            Text(
-                              'View all',
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 18.sp),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 20,
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
+                Servise(),
+                SizedBox(
+                  height: 10.h,
                 ),
+                ListviewText(text: 'Courses'),
                 SizedBox(
                   height: 200.h,
                   child: ListView.builder(
                     scrollDirection: Axis.vertical,
-                    itemCount: 3,
+                    itemCount: names1.length,
                     itemBuilder: (context, index) {
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -249,18 +221,26 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Container(
-                              height: 120.h,
-                              width: 120.w,
+                              height: 100.h,
+                              width: 100.w,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
-                                child: Image.asset(
-                                    'assets/skilled/applicationdev.png'),
+                                child: Image.network(
+                                  imageUrls2[index],
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                             SizedBox(
                               width: 10.w,
                             ),
-                            Text('hellowords'),
+                            Text(
+                              names1[index],
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w400),
+                            ),
                           ],
                         ),
                       );
@@ -268,14 +248,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SizedBox(
-                  height: 5.h,
+                  height: 10.h,
                 ),
-                SizedBox(
-                  height: 150.h,
-                  child: ListViewbuilder(image: 'assets/banner/img1.jpg'),
-                ),
+                ListviewText(text: 'Skill Courses'),
                 SizedBox(
                   height: 10.h,
+                ),
+                ListViewbuilder(
+                  names: skillNames,
+                  images: skillImages,
+                  length: skillImages.length,
                 ),
               ],
             ),
